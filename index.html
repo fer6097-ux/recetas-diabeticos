@@ -42,6 +42,65 @@
     <!-- End Meta Pixel Code -->
     <script type="module" crossorigin src="./assets/index-BUF0-b8L.js"></script>
     <link rel="stylesheet" crossorigin href="./assets/index-Zp4pHUbK.css">
+
+  <style>
+    /* Hero card dinámica */
+    .hero-card-wrapper {
+      padding: 16px 16px 0;
+      perspective: 1200px;
+    }
+    @media (min-width: 640px) {
+      .hero-card-wrapper { padding: 28px 28px 0; }
+    }
+
+    .hero-card {
+      position: relative;
+      border-radius: 32px;
+      overflow: hidden;
+      background: linear-gradient(160deg, #ffffff 0%, #f2faf5 60%, #e8f5ee 100%);
+      box-shadow:
+        0 2px 0 1px rgba(46,168,79,.18),
+        0 24px 72px rgba(26,122,60,.14),
+        0 8px 24px rgba(0,0,0,.07);
+      transform-style: preserve-3d;
+      will-change: transform;
+      transition: transform .12s ease, box-shadow .12s ease;
+    }
+
+    .hero-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 32px;
+      border: 1.5px solid rgba(46,168,79,.22);
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .hero-card-shine {
+      position: absolute;
+      inset: 0;
+      border-radius: 32px;
+      background: radial-gradient(
+        circle at var(--mx, 50%) var(--my, 50%),
+        rgba(255,255,255,.22) 0%,
+        transparent 58%
+      );
+      pointer-events: none;
+      z-index: 6;
+      opacity: 0;
+      transition: opacity .25s ease;
+    }
+    .hero-card:hover .hero-card-shine { opacity: 1; }
+
+    .hero-card-glow {
+      position: absolute;
+      inset: -40px;
+      background: radial-gradient(ellipse at 50% 80%, rgba(46,168,79,.18) 0%, transparent 65%);
+      pointer-events: none;
+      z-index: 0;
+    }
+  </style>
   </head>
 
   <body>
@@ -49,6 +108,88 @@
       src="https://www.facebook.com/tr?id=1498019888466388&ev=PageView&noscript=1"
     /></noscript>
     <div id="root"></div>
+
+  <!-- Hero card dinámica -->
+  <script>
+  (function(){
+    function wrapHero(section){
+      if(section.closest('.hero-card')) return;
+
+      var wrapper = document.createElement('div');
+      wrapper.className = 'hero-card-wrapper';
+
+      var card = document.createElement('div');
+      card.className = 'hero-card';
+
+      var glow = document.createElement('div');
+      glow.className = 'hero-card-glow';
+
+      var shine = document.createElement('div');
+      shine.className = 'hero-card-shine';
+
+      section.parentNode.insertBefore(wrapper, section);
+      card.appendChild(glow);
+      card.appendChild(shine);
+      card.appendChild(section);
+      wrapper.appendChild(card);
+
+      /* 3-D tilt */
+      card.addEventListener('mousemove', function(e){
+        var r  = card.getBoundingClientRect();
+        var x  = e.clientX - r.left;
+        var y  = e.clientY - r.top;
+        var rx = ((y / r.height) - .5) * -10;
+        var ry = ((x / r.width)  - .5) *  10;
+        card.style.transform =
+          'rotateX('+rx+'deg) rotateY('+ry+'deg) scale(1.015)';
+        card.style.boxShadow =
+          '0 2px 0 1px rgba(46,168,79,.22),'
+         +'0 40px 100px rgba(26,122,60,.20),'
+         +'0 12px 36px rgba(0,0,0,.10)';
+        card.style.setProperty('--mx', (x/r.width*100).toFixed(1)+'%');
+        card.style.setProperty('--my', (y/r.height*100).toFixed(1)+'%');
+      });
+
+      card.addEventListener('mouseleave', function(){
+        card.style.transform = 'rotateX(0) rotateY(0) scale(1)';
+        card.style.boxShadow =
+          '0 2px 0 1px rgba(46,168,79,.18),'
+         +'0 24px 72px rgba(26,122,60,.14),'
+         +'0 8px 24px rgba(0,0,0,.07)';
+      });
+
+      /* Touch tilt */
+      card.addEventListener('touchmove', function(e){
+        var t = e.touches[0];
+        var r  = card.getBoundingClientRect();
+        var x  = t.clientX - r.left;
+        var y  = t.clientY - r.top;
+        var rx = ((y / r.height) - .5) * -6;
+        var ry = ((x / r.width)  - .5) *  6;
+        card.style.transform = 'rotateX('+rx+'deg) rotateY('+ry+'deg) scale(1.01)';
+      }, {passive:true});
+
+      card.addEventListener('touchend', function(){
+        card.style.transform = 'rotateX(0) rotateY(0) scale(1)';
+      });
+    }
+
+    function tryWrap(){
+      var s = document.querySelector('#root section.bg-gradient-soft');
+      if(s){ wrapHero(s); return true; }
+      return false;
+    }
+
+    if(!tryWrap()){
+      var obs = new MutationObserver(function(){
+        if(tryWrap()) obs.disconnect();
+      });
+      var root = document.getElementById('root');
+      if(root) obs.observe(root, {childList:true, subtree:true});
+    }
+  })();
+  </script>
+  <!-- Fin hero card dinámica -->
 
   <!-- Popup audio 40% scroll -->
   <div id="audio-popup" style="display:none;position:fixed;inset:0;z-index:10000;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)">
