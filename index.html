@@ -50,8 +50,8 @@
     /></noscript>
     <div id="root"></div>
   <!-- Popup descuento 75% scroll -->
-  <div id="discount-popup" style="display:none;position:fixed;inset:0;z-index:9999;align-items:flex-end;justify-content:center;padding:16px;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)">
-    <div id="discount-card" style="width:100%;max-width:420px;background:#fff;border-radius:24px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.25);transform:translateY(40px);opacity:0;transition:transform .45s cubic-bezier(.34,1.56,.64,1),opacity .35s ease">
+  <div id="discount-popup" style="display:none;position:fixed;inset:0;z-index:9999;align-items:center;justify-content:center;padding:24px;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)">
+    <div id="discount-card" style="width:100%;max-width:400px;background:#fff;border-radius:24px;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.35);transform:translateY(24px) scale(.96);opacity:0;transition:transform .4s cubic-bezier(.34,1.4,.64,1),opacity .3s ease">
       <!-- Header verde -->
       <div style="background:linear-gradient(135deg,#1a7a3c,#2ea84f);padding:20px 20px 16px;position:relative">
         <button onclick="closePopup()" style="position:absolute;top:12px;right:12px;background:rgba(255,255,255,.2);border:none;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-size:18px;line-height:1">✕</button>
@@ -83,20 +83,16 @@
 
   <script>
     (function() {
-      var shown = sessionStorage.getItem('popup_shown');
-      if (shown) return;
-
       function showPopup() {
         var popup = document.getElementById('discount-popup');
         var card = document.getElementById('discount-card');
         popup.style.display = 'flex';
         requestAnimationFrame(function() {
           requestAnimationFrame(function() {
-            card.style.transform = 'translateY(0)';
+            card.style.transform = 'translateY(0) scale(1)';
             card.style.opacity = '1';
           });
         });
-        sessionStorage.setItem('popup_shown', '1');
         window.removeEventListener('scroll', onScroll);
       }
 
@@ -111,7 +107,7 @@
 
     function closePopup() {
       var card = document.getElementById('discount-card');
-      card.style.transform = 'translateY(40px)';
+      card.style.transform = 'translateY(24px) scale(.96)';
       card.style.opacity = '0';
       setTimeout(function() {
         document.getElementById('discount-popup').style.display = 'none';
