@@ -50,6 +50,153 @@
     /></noscript>
     <div id="root"></div>
 
+  <!-- Popup audio 40% scroll -->
+  <div id="audio-popup" style="display:none;position:fixed;inset:0;z-index:10000;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)">
+    <div id="audio-card" style="width:100%;max-width:380px;background:#fff;border-radius:28px;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.3);transform:scale(.92) translateY(20px);opacity:0;transition:transform .4s cubic-bezier(.34,1.4,.64,1),opacity .3s ease">
+      <!-- Header -->
+      <div style="background:linear-gradient(135deg,#1a7a3c,#2ea84f);padding:22px 22px 18px;position:relative;text-align:left">
+        <button onclick="closeAudioPopup()" style="position:absolute;top:14px;right:14px;background:rgba(255,255,255,.2);border:none;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-size:17px;line-height:1">✕</button>
+        <div style="font-size:13px;font-weight:700;letter-spacing:1.5px;color:rgba(255,255,255,.75);text-transform:uppercase;margin-bottom:6px">🎧 Un momento</div>
+        <div style="font-family:'Playfair Display',Georgia,serif;font-size:24px;font-weight:900;font-style:italic;color:#fff;line-height:1.2">¡Espera!<br>Escucha esto 👇</div>
+      </div>
+
+      <!-- Audio player -->
+      <div style="padding:22px 22px 0">
+        <audio id="promo-audio" src="./assets/promo-audio.mp3" preload="auto"></audio>
+
+        <!-- Waveform animada -->
+        <div id="wave-container" style="display:flex;align-items:center;justify-content:center;gap:4px;height:48px;margin-bottom:16px">
+          <style>
+            @keyframes waveBar{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}
+            .wave-bar{width:4px;border-radius:4px;background:#2ea84f;transform-origin:center;transform:scaleY(.3)}
+            .playing .wave-bar:nth-child(1){animation:waveBar .9s ease-in-out -.7s infinite}
+            .playing .wave-bar:nth-child(2){animation:waveBar .9s ease-in-out -.5s infinite}
+            .playing .wave-bar:nth-child(3){animation:waveBar .9s ease-in-out -.3s infinite}
+            .playing .wave-bar:nth-child(4){animation:waveBar .9s ease-in-out -.1s infinite}
+            .playing .wave-bar:nth-child(5){animation:waveBar .9s ease-in-out 0s infinite}
+            .playing .wave-bar:nth-child(6){animation:waveBar .9s ease-in-out -.2s infinite}
+            .playing .wave-bar:nth-child(7){animation:waveBar .9s ease-in-out -.4s infinite}
+            .playing .wave-bar:nth-child(8){animation:waveBar .9s ease-in-out -.6s infinite}
+            .playing .wave-bar:nth-child(9){animation:waveBar .9s ease-in-out -.8s infinite}
+            .playing .wave-bar:nth-child(10){animation:waveBar .9s ease-in-out -.5s infinite}
+            .playing .wave-bar:nth-child(11){animation:waveBar .9s ease-in-out -.3s infinite}
+            .playing .wave-bar:nth-child(12){animation:waveBar .9s ease-in-out -.1s infinite}
+          </style>
+          <div id="wave-bars" style="display:flex;align-items:center;gap:4px;height:48px">
+            <div class="wave-bar" style="height:18px"></div><div class="wave-bar" style="height:30px"></div>
+            <div class="wave-bar" style="height:42px"></div><div class="wave-bar" style="height:24px"></div>
+            <div class="wave-bar" style="height:36px"></div><div class="wave-bar" style="height:48px"></div>
+            <div class="wave-bar" style="height:36px"></div><div class="wave-bar" style="height:48px"></div>
+            <div class="wave-bar" style="height:30px"></div><div class="wave-bar" style="height:42px"></div>
+            <div class="wave-bar" style="height:24px"></div><div class="wave-bar" style="height:18px"></div>
+          </div>
+        </div>
+
+        <!-- Controles -->
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+          <button id="play-btn" onclick="toggleAudio()" style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#1a7a3c,#2ea84f);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;box-shadow:0 4px 16px rgba(26,122,60,.4)">▶️</button>
+          <div style="flex:1">
+            <input id="audio-progress" type="range" min="0" max="100" value="0" oninput="seekAudio(this.value)" style="width:100%;height:4px;accent-color:#1a7a3c;cursor:pointer">
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#999;margin-top:4px;font-weight:600">
+              <span id="current-time">0:00</span>
+              <span id="total-time">0:00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div style="padding:16px 22px 24px">
+        <a href="https://www.google.com" style="display:block;background:linear-gradient(135deg,#1a7a3c,#2ea84f);color:#fff;text-align:center;padding:16px;border-radius:14px;font-size:16px;font-weight:800;text-decoration:none;box-shadow:0 8px 24px rgba(26,122,60,.35)">
+          ¡Quiero mi pack ahora! →
+        </a>
+        <p style="text-align:center;font-size:12px;color:#aaa;margin:10px 0 0">🔒 Acceso inmediato · Pago seguro</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Audio popup logic
+    (function(){
+      var triggered = false;
+      function showAudioPopup(){
+        if(triggered) return;
+        triggered = true;
+        var popup = document.getElementById('audio-popup');
+        var card = document.getElementById('audio-card');
+        popup.style.display = 'flex';
+        requestAnimationFrame(function(){
+          requestAnimationFrame(function(){
+            card.style.transform = 'scale(1) translateY(0)';
+            card.style.opacity = '1';
+          });
+        });
+        // Autoplay attempt
+        var audio = document.getElementById('promo-audio');
+        audio.play().catch(function(){});
+        window.removeEventListener('scroll', onAudioScroll);
+      }
+      function onAudioScroll(){
+        var pct = (window.scrollY + window.innerHeight) / document.documentElement.scrollHeight;
+        if(pct >= 0.40) showAudioPopup();
+      }
+      window.addEventListener('scroll', onAudioScroll, {passive:true});
+    })();
+
+    function closeAudioPopup(){
+      var audio = document.getElementById('promo-audio');
+      audio.pause();
+      var card = document.getElementById('audio-card');
+      card.style.transform = 'scale(.92) translateY(20px)';
+      card.style.opacity = '0';
+      setTimeout(function(){ document.getElementById('audio-popup').style.display = 'none'; }, 300);
+    }
+
+    document.addEventListener('DOMContentLoaded', function(){
+      var audio = document.getElementById('promo-audio');
+      var playBtn = document.getElementById('play-btn');
+      var progress = document.getElementById('audio-progress');
+      var waveBars = document.getElementById('wave-bars');
+      var currentTimeEl = document.getElementById('current-time');
+      var totalTimeEl = document.getElementById('total-time');
+
+      function fmt(s){ var m=Math.floor(s/60); return m+':'+(Math.floor(s%60)<10?'0':'')+Math.floor(s%60); }
+
+      audio.addEventListener('loadedmetadata', function(){ totalTimeEl.textContent = fmt(audio.duration); });
+      audio.addEventListener('timeupdate', function(){
+        currentTimeEl.textContent = fmt(audio.currentTime);
+        progress.value = audio.duration ? (audio.currentTime/audio.duration)*100 : 0;
+      });
+      audio.addEventListener('play', function(){
+        playBtn.textContent = '⏸️';
+        waveBars.classList.add('playing');
+      });
+      audio.addEventListener('pause', function(){
+        playBtn.textContent = '▶️';
+        waveBars.classList.remove('playing');
+      });
+      audio.addEventListener('ended', function(){
+        playBtn.textContent = '▶️';
+        waveBars.classList.remove('playing');
+        progress.value = 0;
+      });
+    });
+
+    function toggleAudio(){
+      var audio = document.getElementById('promo-audio');
+      audio.paused ? audio.play() : audio.pause();
+    }
+    function seekAudio(val){
+      var audio = document.getElementById('promo-audio');
+      if(audio.duration) audio.currentTime = (val/100)*audio.duration;
+    }
+
+    document.getElementById('audio-popup').addEventListener('click', function(e){
+      if(e.target === this) closeAudioPopup();
+    });
+  </script>
+  <!-- Fin popup audio -->
+
   <!-- Sección métodos de pago -->
   <section id="pagos-section" style="background:linear-gradient(180deg,#f0faf4 0%,#fff 100%);padding:72px 20px 64px;text-align:center;font-family:'Poppins',sans-serif;overflow:hidden">
     <div style="max-width:640px;margin:0 auto 48px">
