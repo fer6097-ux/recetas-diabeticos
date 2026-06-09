@@ -1,5 +1,9 @@
 {
+  "redirects": [
+    { "source": "/", "destination": "/recetas-diabeticos/", "permanent": false }
+  ],
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/recetas-diabeticos/assets/:path+", "destination": "/assets/:path+" },
+    { "source": "/recetas-diabeticos(.*)", "destination": "/index.html" }
   ]
 }
